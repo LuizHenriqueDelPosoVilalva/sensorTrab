@@ -1,6 +1,6 @@
 import net from "net";
 
-const STORAGE_HOST: string = "172.23.130.167";
+const STORAGE_HOST: string = "172.23.129.103";
 const STORAGE_PORT: number =6000;
 
 // Tipo do dado esperado do sensor

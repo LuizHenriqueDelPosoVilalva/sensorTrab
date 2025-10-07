@@ -2,7 +2,7 @@ import net from "net";
 import fs from "fs";
 import path from "path";
 
-const STORAGE_PORT = 6000;
+const STORAGE_PORT = 6006;
 
 const DATA_DIR = path.join(process.cwd(), "data");
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });

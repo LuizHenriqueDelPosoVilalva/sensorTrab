@@ -1,6 +1,6 @@
 import net from "net";
 
-const SENSOR_PORT = "5000";
+const SENSOR_PORT = 5002;
 const SENSOR_TYPES = ["temperature", "humidity", "heat_index"];
 const SENSOR_ID = `${Math.floor(Math.random() * 1000)}`;
 const CITY =  "Bairro-A";

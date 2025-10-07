@@ -2,12 +2,12 @@ import net from "net";
 import fs from "fs";
 import path from "path";
 
-const SENSOR_HOST = "127.0.0.1";
-const SENSOR_PORT = 5000;
+const SENSOR_HOST = "172.23.129.103";
+const SENSOR_PORT = 5002;
 
 // Destino (Componente 3 - Armazenamento)
-const STORAGE_HOST = "127.0.0.1";
-const STORAGE_PORT = 6000;
+const STORAGE_HOST = "172.23.129.103";
+const STORAGE_PORT = 6006;
 
 // Opcional: manter cópia local (ativar com KEEP_LOCAL_COPY=true)
 const KEEP_LOCAL_COPY =
