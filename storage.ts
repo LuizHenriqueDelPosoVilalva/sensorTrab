@@ -24,7 +24,6 @@ const server = net.createServer((socket) => {
 
       if (!line) continue;
 
-      // --- Novo: comando GET_ALL ---
       if (line === "GET_ALL") {
         console.log("[STORAGE] Enviando todos os registros...");
         if (fs.existsSync(DB_FILE)) {
@@ -40,9 +39,8 @@ const server = net.createServer((socket) => {
         continue;
       }
 
-      // --- Comportamento existente: salvar JSON ---
       try {
-        JSON.parse(line); // valida
+        JSON.parse(line);
         fs.appendFileSync(DB_FILE, line + "\n");
         console.log(`[STORAGE] Registro salvo (${line.length}b)`);
       } catch (e) {

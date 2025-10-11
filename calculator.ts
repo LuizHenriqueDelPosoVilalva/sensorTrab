@@ -3,14 +3,12 @@ import net from "net";
 const STORAGE_HOST: string = "172.23.129.103";
 const STORAGE_PORT: number =6000;
 
-// Tipo do dado esperado do sensor
 interface Measurement {
   value: number;          
   timestamp?: string;
   [key: string]: any;   
 }
 
-// Tipo das estatísticas calculadas
 interface Stats {
   count: number;
   avg: number | null;
@@ -18,7 +16,6 @@ interface Stats {
   max: number | null;
 }
 
-// Função para buscar dados do Storage
 function fetchData(callback: (data: Measurement[]) => void): void {
   const client = net.createConnection(
     { host: STORAGE_HOST, port: STORAGE_PORT },
