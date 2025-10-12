@@ -2,14 +2,13 @@ import net from "net";
 import fs from "fs";
 import path from "path";
 
-const SENSOR_HOST = "172.23.129.103";
-const SENSOR_PORT = 5002;
+const SENSOR_HOST = '10.0.0.173';
+const SENSOR_PORT = 5002
 
-const STORAGE_HOST = "172.23.129.103";
-const STORAGE_PORT = 6006;
+const STORAGE_HOST = '10.0.0.173'
+const STORAGE_PORT = 5005
 
-const KEEP_LOCAL_COPY =
-  (process.env.KEEP_LOCAL_COPY || "false").toLowerCase() === "true";
+const KEEP_LOCAL_COPY = ("false").toLowerCase() === "true";
 const DATA_DIR = path.join(process.cwd(), "data");
 if (KEEP_LOCAL_COPY && !fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 const DB_FILE = path.join(DATA_DIR, "measurements.jsonl");
@@ -19,7 +18,6 @@ let storageBuffer: string[] = [];
 
 function connectStorage() {
   if (storageSocket) return;
-
   const sock = net.createConnection(
     { host: STORAGE_HOST, port: STORAGE_PORT },
     () => {

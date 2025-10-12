@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package measurements;
+
+import "google/protobuf/empty.proto";
+
+service MeasurementService {
+  rpc GetAll(google.protobuf.Empty) returns (MeasurementList);
+}
+
+message Measurement {
+  string city = 1;
+  string sensorId = 2;
+  string sensorType = 3;
+  string value = 4;
+  string unit = 5;
+  string timestamp = 6;
+}
+
+message MeasurementList {
+  repeated Measurement measurements = 1;
+}
