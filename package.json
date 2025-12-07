@@ -5,12 +5,7 @@
     "start:gateway": "ts-node gateway.ts",
     "start:calc": "ts-node calculator.ts",
     "start:sensor": "ts-node sensor.ts",
-    "start:grpc-storage": "ts-node grpc_storage.ts"
-  },
-  "dependencies": {
-    "@grpc/grpc-js": "^1.8.18",
-    "@grpc/proto-loader": "^0.7.9",
-    "google-protobuf": "^3.21.2"
+    "start:storage": "ts-node storage.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

@@ -1,39 +1,16 @@
-import * as grpc from '@grpc/grpc-js';
-import { loadSync } from '@grpc/proto-loader';
+import net from "net";
 
-const packageDef = loadSync("./measurements.proto", {
-  keepCase: false,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
-});
+const STORAGE_HOST: string = "172.23.129.103";
+const STORAGE_PORT: number =6000;
 
-const proto = (grpc.loadPackageDefinition(packageDef) as any).measurements;
-
-const STORAGE_ADDRESS = '10.0.0.173:50051';
-
-const client = new proto.MeasurementService(
-  STORAGE_ADDRESS,
-  (grpc.credentials as any).createInsecure()
-);
-
-function waitReady(timeoutMs = 10000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const deadline = new Date(Date.now() + timeoutMs);
-    client.waitForReady(deadline, (err: Error | null) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
-}
-
+// Tipo do dado esperado do sensor
 interface Measurement {
-  value: string | number;
+  value: number;          
   timestamp?: string;
-  [key: string]: any;
+  [key: string]: any;   
 }
 
+// Tipo das estatísticas calculadas
 interface Stats {
   count: number;
   avg: number | null;
@@ -41,14 +18,61 @@ interface Stats {
   max: number | null;
 }
 
+// Função para buscar dados do Storage
+function fetchData(callback: (data: Measurement[]) => void): void {
+  const client = net.createConnection(
+    { host: STORAGE_HOST, port: STORAGE_PORT },
+    () => client.write("GET_ALL\n")
+  );
+
+  let buffer = "";
+
+  client.on("data", (data: Buffer) => {
+    buffer += data.toString();
+  });
+
+  client.on("end", () => {
+    const lines = buffer.trim().split("\n");
+    const data: Measurement[] = [];
+
+    for (const line of lines) {
+      try {
+        const obj = JSON.parse(line);
+
+        // converte value para number
+        if (typeof obj.value === "string") {
+          obj.value = Number(obj.value);
+        }
+
+        if (!isNaN(obj.value)) {
+          data.push(obj as Measurement);
+        }
+      } catch {
+        // ignora linhas inválidas
+      }
+    }
+
+    callback(data);
+  });
+
+  client.on("error", (err: Error) => {
+    console.error("[CALCULATOR] Erro ao conectar ao Storage:", err.message);
+    callback([]);
+  });
+}
+
+// Função para calcular estatísticas
 function calculateStats(data: Measurement[]): Stats {
+  if (data.length === 0) return { count: 0, avg: null, min: null, max: null };
+
   const values: number[] = data
-    .map((d) => typeof d.value === 'string' ? Number(d.value) : d.value)
-    .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+    .map((d) => d.value)
+    .filter((v): v is number => typeof v === "number" && !isNaN(v));
 
   if (values.length === 0) return { count: 0, avg: null, min: null, max: null };
 
   const sum = values.reduce((a, b) => a + b, 0);
+
   return {
     count: values.length,
     avg: sum / values.length,
@@ -57,36 +81,12 @@ function calculateStats(data: Measurement[]): Stats {
   };
 }
 
-function fetchRemoteMeasurements(callback: (measurements: Measurement[]) => void): void {
-  const attempt = async (tries = 0) => {
-    try {
-      await waitReady(5000);
-    } catch (err: any) {
-      const backoff = Math.min(30000, 1000 * Math.pow(2, tries));
-      console.warn(`[CALCULATOR] gRPC not ready, retrying in ${backoff}ms: ${err && err.message}`);
-      setTimeout(() => attempt(tries + 1), backoff);
-      return;
-    }
-
-    client.GetAll({}, (err2: Error | null, response: any) => {
-      if (err2) {
-        console.error('[CALCULATOR] gRPC GetAll error:', err2.message);
-        return callback([]);
-      }
-
-      const list: Measurement[] = response && response.measurements ? response.measurements : [];
-      callback(list);
-    });
-  };
-
-  attempt(0);
-}
-
+// Execução periódica
 function runCalculator(): void {
-  console.log('[CALCULATOR] Solicitando medições via gRPC...');
-  fetchRemoteMeasurements((data) => {
+  console.log("[CALCULATOR] Solicitando dados ao Storage...");
+  fetchData((data) => {
     const stats = calculateStats(data);
-    console.log('[CALCULATOR] Estatísticas calculadas:');
+    console.log("[CALCULATOR] Estatísticas calculadas:");
     console.log(`- Total registros: ${stats.count}`);
     console.log(`- Valor médio: ${stats.avg}`);
     console.log(`- Valor mínimo: ${stats.min}`);
@@ -95,5 +95,3 @@ function runCalculator(): void {
 }
 
 setInterval(runCalculator, 5000);
-runCalculator();
-

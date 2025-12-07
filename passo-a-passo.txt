@@ -1,0 +1,51 @@
+1° passo (Componente 3 - Storage: máquina que armazena os dados):
+
+$env:STORAGE_PORT="6000"; 
+npm run start:storage
+
+O storage abrirá um servidor TCP e vai salvar cada linha JSON recebida em data/measurements.jsonl.
+
+
+2° passo (Componente 1 - Sensores: máquinas que geram dados):
+(temperatura)
+$env:CITY="Bairro-A"; `
+$env:SENSOR_TYPE="temperature"; `
+$env:SENSOR_ID="temp-A-01"; `
+$env:SENSOR_PORT="5000"; `
+npm run start:sensor
+
+
+(umidade)
+$env:CITY="Bairro-A"; `
+$env:SENSOR_TYPE="humidity"; `
+$env:SENSOR_ID="hum-A-01"; `
+$env:SENSOR_PORT="5001"; `
+npm run start:sensor
+
+
+(calor):
+$env:CITY="Bairro-A"; $env:SENSOR_TYPE="heat_index"; $env:SENSOR_ID="heat-A-03"; $env:INTERVAL_MS="5000"; $env:GATEWAY_HOST="127.0.0.1"; npm run start:sensor
+$env:CITY="Bairro-B"; $env:SENSOR_TYPE="heat_index"; $env:SENSOR_ID="heat-B-03"; $env:INTERVAL_MS="5000"; $env:GATEWAY_HOST="127.0.0.1"; npm run start:sensor
+
+3° passo (Componente 2 - Gateway: consome do sensor e redireciona para o storage):
+
+# Quando sensor e storage estão na mesma máquina local
+$env:SENSOR_HOST="127.0.0.1"; `
+$env:SENSOR_PORT="5000"; `
+$env:STORAGE_HOST="127.0.0.1"; `
+$env:STORAGE_PORT="6000"; `
+# Opcional: manter cópia local no gateway
+# $env:KEEP_LOCAL_COPY="true"; 
+npm run start:gateway
+
+# Quando o sensor está em outro PC (o outro tem que estar com o sensor como servidor)
+$env:SENSOR_HOST="172.23.143.132"; `  # IP do sensor
+$env:SENSOR_PORT="5000"; `
+$env:STORAGE_HOST="192.168.0.50"; `     # IP da máquina do storage
+$env:STORAGE_PORT="6000"; `
+npm run start:gateway
+
+4° passo: cálculo (opcional)
+npm run start:calc
+
+O cálculo deve ler o arquivo data/measurements.jsonl gerado pelo storage.

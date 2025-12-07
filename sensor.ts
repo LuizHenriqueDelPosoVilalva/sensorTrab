@@ -6,6 +6,7 @@ const SENSOR_ID = `${Math.floor(Math.random() * 1000)}`;
 const CITY =  "Bairro-A";
 
 
+// Função para gerar valor fake
 function generateValue(type: String) {
   switch (type) {
     case "temperature": return { value: (20 + Math.random() * 10).toFixed(2), unit: "C" };
@@ -22,6 +23,7 @@ const server = net.createServer((socket) => {
     const req = data.toString().trim();
 
     if (req === "GET") {
+      // Envia cada sensor separadamente
       SENSOR_TYPES.forEach((type) => {
         const { value, unit } = generateValue(type);
         const msg = {
